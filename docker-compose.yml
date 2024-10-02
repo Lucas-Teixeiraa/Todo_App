@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: todo_User
+      POSTGRES_PASSWORD: todopass
+      POSTGRES_DB: ToDoBD
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - todo-net
+
+  backend:
+    build:
+      context: ./backend/ToDoApp
+    container_name: kotlin_backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ToDoBD
+      SPRING_DATASOURCE_USERNAME: todo_User
+      SPRING_DATASOURCE_PASSWORD: todopass
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - todo-net
+
+  frontend:
+    build:
+      context: ./frontend/todoAppFront/todo-app
+    container_name: react_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - todo-net
+
+volumes:
+  postgres_data:
+
+networks:
+  todo-net:
